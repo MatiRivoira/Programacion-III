@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Alumno</title>
+    <link rel="icon" href="./img/icon.png">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/form.js"></script>
+</head>
+<body>
+        <form action="./nexo_poo_foto.php" method="post" enctype="multipart/form-data">
+            <div class="item">
+                <input type="text" id="legajo" name="legajo" required>
+                <label class="lbl-nombre">
+                    <span class="text-nomb">Legajo</span>
+                </label>
+            </div>
+            <div class="item">
+                <input type="text" id="nombre" name="nombre" required>
+                <label class="lbl-nombre">
+                    <span class="text-nomb">Nombre</span>
+                </label>
+            </div>
+            <div class="item">
+                <input type="text" id="apellido" name="apellido" required>
+                <label class="lbl-nombre">
+                    <span class="text-nomb">Apellido</span>
+                </label>
+            </div>
+            <div class="item">
+                <input type="file" name="foto" required>
+            </div>
+            <br>
+            <button class="boton" type="submit" name="accion" value="agregar" ><span>Agregar</span></button>
+            <button class="boton" type="submit" name="accion" value="borrar" ><span>Borrar</span></button>
+            <button class="boton" type="submit" name="accion" value="modificar" ><span>Modificar</span></button>
+            <button class="boton" type="submit" name="accion" value="listar" ><span>Listar</span></button> <br>
+            <button class="boton" type="submit" name="accion" value="redirigir" ><span>Redirigir</span></button>
+            <button class="boton" type="submit" name="accion" value="obtener" ><span>Obtener</span></button>
+        </form>
+        <a href="./nexo_poo_foto.php?accion=listarPDF" style="margin-top: 333px; margin-left: 100px; position: absolute; z-index: 2;"><button id="botonPDF" class="boton" disabled><span>ListarPDF</span></button></a>
+    </body>
+    </html>
