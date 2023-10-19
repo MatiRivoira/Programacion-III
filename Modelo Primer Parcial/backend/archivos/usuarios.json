@@ -1,0 +1,18 @@
+[
+    {
+        "id": 9131,
+        "nombre": "1",
+        "correo": "1",
+        "clave": "1",
+        "id_perfil": 9131,
+        "perfil": ""
+    },
+    {
+        "id": 2167,
+        "nombre": "2",
+        "correo": "2",
+        "clave": "2",
+        "id_perfil": 2167,
+        "perfil": ""
+    }
+]

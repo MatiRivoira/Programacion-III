@@ -1,0 +1,16 @@
+[
+    {
+        "patente": "1",
+        "marca": "ford",
+        "color": "rojo",
+        "precio": 10,
+        "pathFoto": ".\/autos\/imagenes\/1.055513.jpg "
+    },
+    {
+        "patente": "2",
+        "marca": "ford",
+        "color": "rojo",
+        "precio": 10,
+        "pathFoto": ".\/autos\/imagenes\/1.055513.jpg "
+    }
+]
