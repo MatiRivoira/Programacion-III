@@ -12,6 +12,7 @@ use PDO;
 use RivoiraMatias\IParte1;
 use RivoiraMatias\IParte2;
 use RivoiraMatias\IParte3;
+use stdClass;
 
 class autoBD extends Auto implements IParte1, IParte2, IParte3
 {
@@ -142,22 +143,84 @@ class autoBD extends Auto implements IParte1, IParte2, IParte3
         }
     }
 
-    public function guardarEnArchivo(): string {
-        $destinoCarpeta = "./autosBorrados/";
-        // Genera un nombre único para la imagen
-        $hora_actual = date("His");
-        $nombreImagen = $this->patente . '.borrado.' . $hora_actual . '.jpg';
-        $destino = $destinoCarpeta . $nombreImagen;
-        if (move_uploaded_file($this->pathFoto, $destino)) {
-            $autos = json_decode(file_get_contents("./archivos/autosbd_borrados.txt"));
-            $this->pathFoto = $destino;
-            $autos[] = $this;
-            if (file_put_contents("./archivos/autosbd_borrados.txt", json_encode($autos, JSON_PRETTY_PRINT))) {
-                return json_encode(array("exito" => true, "mensaje" => "Auto guardado correctamente"));
+    public function guardarEnArchivo() : string{
+        $obj = new stdClass();
+        $obj->exito = false;
+        $obj->mensaje = "Error al guardar.";
+
+        $nombreFoto = $this->patente . ".borrado." . date("His") . ".jpg";
+        $nuevoPath = "./autosBorrados/" . $nombreFoto;
+        $viejoPath = $this->pathFoto;
+
+        if(rename($viejoPath, $nuevoPath)){
+            $this->pathFoto = $nuevoPath;
+
+            $archivo = fopen("./archivos/autosbd_borrados.txt", "a");
+
+            $contenidoActual = file_get_contents("./archivos/autosbd_borrados.txt");
+            $autosEliminados = json_decode($contenidoActual, true);
+
+            if ($autosEliminados === null) {
+                $autosEliminados = [];
             }
-            return json_encode(array("exito" => false, "mensaje" => "Auto no guardado correctamente"));
-        } else {
-            return json_encode(array("exito" => false, "mensaje" => "No se pudo mover la imagen"));
+
+            array_push($autosEliminados, $this->toJSON());
+
+            $contenidoNuevo = json_encode($autosEliminados);
+            $resultado = file_put_contents("./archivos/autosbd_borrados.txt", $contenidoNuevo);
+
+            fclose($archivo);
+
+            if($resultado){
+                $obj->exito = $resultado;
+                $obj->mensaje = "Guardado con exito."; 
+            }
         }
+
+        return json_encode($obj);
+    }
+
+    public static function traerEliminadosBD(){
+        $path = "./archivos/autosbd_borrados.txt";
+        $autosEliminados = array();
+
+        if(file_exists($path)){
+            $contenido = file_get_contents($path);
+
+            $data = json_decode($contenido);
+            return $data;
+            if($data){
+                foreach($data as $linea){
+                    $autoJson = json_decode($linea);
+                    
+                    $auto = new AutoBD($autoJson->patente, $autoJson->marca, $autoJson->color, $autoJson->precio, $autoJson->pathFoto);
+                    array_push($autosEliminados, $auto);
+                }
+            }
+        }
+
+        return $autosEliminados;
+    }
+
+    public static function traerModificadosBD(){
+        $path = "./archivos/autosbd_modificados.txt";
+        $autosEliminados = array();
+
+        if(file_exists($path)){
+            $contenido = file_get_contents($path);
+
+            $data = json_decode($contenido);
+            return $data;
+            if($data){
+                foreach($data as $linea){
+                    $autoJson = json_decode($linea);
+                    
+                    $auto = new AutoBD($autoJson->patente, $autoJson->marca, $autoJson->color, $autoJson->precio, $autoJson->pathFoto);
+                    array_push($autosEliminados, $auto);
+                }
+            }
+        }
+
+        return $autosEliminados;
     }
 }

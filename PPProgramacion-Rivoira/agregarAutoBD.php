@@ -18,11 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombreImagen = $patente . "." . $hora_actual . "." . $tipoArchivo;
     $destino = $destinoCarpeta . $nombreImagen;
 
-    $auto = new autoBD($patente, $marca, $color, $precio, $destino);
-    if ($auto->existe()) {
+    $auto = new autoBD($patente, $marca, $color, $precio, $nombreImagen);
+    if (!$auto->existe()) {
         if ($auto->agregar()) {
             move_uploaded_file($foto["tmp_name"], $destino);
-            echo "{'exito': false, 'mensaje': El Auto se agrego correctamente}";
+            echo "{'exito': true, 'mensaje': El Auto se agrego correctamente}";
         } else {
             echo "{'exito': false, 'mensaje': El Auto no se agrego correctamente}";
         }

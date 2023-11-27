@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                       <td>$auto->marca</td>
                       <td>$auto->color</td>
                       <td>$auto->precio</td>
-                      <td><img src="$auto->foto" alt="auto"></td>
+                      <td><img src="./autos/imagenes/$auto->foto" alt="auto"></td>
                       </tr>`;
         }
         echo $html;

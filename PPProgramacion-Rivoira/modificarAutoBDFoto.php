@@ -4,57 +4,83 @@ use RivoiraMatias\autoBD;
 
 include_once "./clases/autoDB.php";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $auto = json_decode($_POST["auto_json"], true);
-    $foto = $_FILES["foto"];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $auto_json = isset($_POST["auto_json"]) ? $_POST["auto_json"] : null;
+    $foto = isset($_FILES["foto"]) ? $_FILES["foto"] : null;
 
-    $destinoCarpeta = "./autos/imagenes/";
-    $hora_actual = date("His");
-    $tipoArchivo = pathinfo($foto["name"], PATHINFO_EXTENSION);
-    $nombreImagen = $patente . "." . $hora_actual . "." . $tipoArchivo;
-    $destino = $destinoCarpeta . $nombreImagen;
+    $autoData = json_decode($auto_json);
 
-    if (move_uploaded_file($foto["tmp_name"] , $destino)) {
-        if ((new autoBD($auto["patente"], $auto["marca"], $auto["color"], $auto["precio"], $destino))->modificar()) {
+    $obj = new stdClass();
+    $obj->exito =  false;
+    $obj->mensaje = "Error al modificar el auto.";
 
-            $destinoCarpetaModificados = "./autosModificados/";
-            $ubicacionAntigua = autoBD::traerUno($auto["patente"])->pathFoto;
-            $tipoArchivo = pathinfo($ubicacionAntigua, PATHINFO_EXTENSION);
-            $nombreImagenModificada = $auto['patente'] . ".modificado.{$hora_actual}.{$tipoArchivo}";
-            $destinoModificado = $destinoCarpetaModificados . $nombreImagenModificada;
-
-            if (move_uploaded_file($ubicacionAntigua, $destinoModificado)) {
-                echo "{'exito': true, 'mensaje': El AUTO se modifico correctamente}";
-            } else {
-                echo "{'exito': false, 'mensaje': La foto original no se movio correctamente}";
+    if($autoData){
+        foreach(AutoBD::traer() as $auto){
+            if($auto->patente == $autoData->patente){
+                $viejoPath = $auto->pathFoto;
+                break;
             }
+        }
+        if (isset($viejoPath)) {
+            $nuevoPath = $autoData->patente . ".modificado." . date("His") . ".jpg";
+
+            $auto = new AutoBD($autoData->patente, $autoData->marca, $autoData->color, $autoData->precio, $nuevoPath);
+
+            $resultado = $auto->modificar();
+
+            if($resultado){
+                if(rename($viejoPath, "./autosModificados/" . $nuevoPath)){
+                    $obj->exito =  true;
+                    $obj->mensaje = "Auto modificado con exito.";
+                }
+            }      
         } else {
-            echo "{'exito': false, 'mensaje': El AUTO no se modifico correctamente}";
+            $obj->exito = false;
+            $obj->mensaje = "El auto no esta en la base de datos";
         }
     } else {
-        echo "{'exito': false, 'mensaje': no se pudo modificar la foto}";
+        $obj = new stdClass();
+        $obj->exito = false;
+        $obj->mensaje = "Error en los datos recibidos.";
     }
-}
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $autosBorrados = json_decode(file_get_contents("./archivos/autosbd_modificados.txt"), true);
-    $html = '<table>
-                <tr>
-                    <th>Patente</th>
-                    <th>Marca</th>
-                    <th>Color</th>
-                    <th>Precio</th>
-                    <th>Foto</th>
-                </tr>';
-    foreach ($autosBorrados as $auto) {
-        $html .= '<tr>
-                    <td>' . $auto['patente'] . '</td>' .
-                    '<td>' . $auto['marca'] . '</td>' .
-                    '<td>' . $auto['color'] . '</td>' .
-                    '<td>' . $auto['precio'] . '</td>' .
-                    '<td><img src="' . $auto['pathFoto'] . '" alt="Foto" width="100"></td>' .
-                 '</tr>';
+    echo json_encode($obj);
+
+} else if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    $autosEliminados = AutoBD::traerModificadosBD();
+
+    echo "<html>
+            <head>
+            <title>Autos Borrados</title>
+            </head>
+            <body>
+            <h1>Autos Borrados</h1>";
+
+    echo "<table border='1'>
+            <thead>
+            <tr>
+            <th>Patente</th>
+            <th>Marca</th>
+            <th>Color</th>
+            <th>Precio</th>
+            <th>Foto</th>
+            </tr>
+            </thead>
+            <tbody>";
+    
+    foreach($autosEliminados as $auto){
+        echo "<tr>
+                <td> . $auto->patente . </td>
+                <td> . $auto->marca . </td>
+                <td> . $auto->color . </td>
+                <td> . $auto->precio . </td>
+                <td><img src=" . $auto->pathFoto .  "width='100'>
+                </td>
+                </tr>";
     }
-    $html .= '</table>';
-    echo $html;
+
+    echo "</tbody>
+            </table>
+            </body>
+            </html>";
 }
